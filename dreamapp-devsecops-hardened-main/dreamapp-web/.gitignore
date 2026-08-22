@@ -1,6 +1,8 @@
 node_modules/
 dist/
 coverage/
+licenses.json
+sbom.spdx.json
 *.tsbuildinfo
 
 .env
