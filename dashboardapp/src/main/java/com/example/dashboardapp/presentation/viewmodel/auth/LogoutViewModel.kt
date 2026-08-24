@@ -27,25 +27,20 @@ class LogoutViewModel @Inject constructor(
     val uiState: StateFlow<LogoutUiState> = _uiState
 
     fun logout() {
-        android.util.Log.d("LogoutViewModel", "logout() llamado")
         _uiState.value = LogoutUiState(isLoading = true)
 
         viewModelScope.launch {
-            android.util.Log.d("LogoutViewModel", "Llamando LogoutUseCase...")
             val result = logoutUseCase()
 
             if (result.isSuccess) {
                 val response = result.getOrNull()
                 if (response?.success == true) {
-                    android.util.Log.d("LogoutViewModel", "Logout exitoso, success=true")
                     sessionManager.clearSession()
                     _uiState.value = LogoutUiState(success = true)
                 } else {
-                    android.util.Log.d("LogoutViewModel", "Logout no fue exitoso (success!=true)")
                     _uiState.value = LogoutUiState(error = "Logout no fue exitoso")
                 }
             } else {
-                android.util.Log.d("LogoutViewModel", "Logout falló: ${result.exceptionOrNull()?.message}")
                 _uiState.value = LogoutUiState(
                     error = result.exceptionOrNull()?.message ?: "Error desconocido"
                 )

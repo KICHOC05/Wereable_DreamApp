@@ -10,7 +10,6 @@ class SleepPhaseRepositoryImpl(context: Context) : SleepPhaseRepository {
     private val dao = SleepPhaseDatabase.getDatabase(context).sleepPhaseDao()
 
     override suspend fun insert(record: SleepPhaseDataEntity) {
-        Log.d("RoomInsert", "📝 Insertando fase: ${record.phase} - HR: ${record.bpm}")
         dao.insert(record)
     }
 

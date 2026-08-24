@@ -43,7 +43,6 @@ class SensorRepositoryImpl(
             // Simular RR derivado del BPM
             hrvManager.onNewBPM(it)
 
-            Log.d("SensorRepo", "BPM: $it enviado a HRVManager")
         }
     }
 
@@ -94,7 +93,6 @@ class SensorRepositoryImpl(
         val validRR = filterValidRR(rr)
 
         if (validRR.size < 2) {
-            Log.w("SleepPhaseDetector", "❌ No hay suficientes RR válidos para RMSSD: $rr")
             return 0.0
         }
 
@@ -102,7 +100,6 @@ class SensorRepositoryImpl(
         val squaredDiffs = diffs.map { it * it }
         val rmssd = kotlin.math.sqrt(squaredDiffs.average())
 
-        Log.d("SleepPhaseDetector", "🔁 RMSSD: $rmssd, RR: $validRR")
 
         return rmssd
     }
@@ -112,7 +109,6 @@ class SensorRepositoryImpl(
         val validRR = filterValidRR(rr)
 
         if (validRR.size < 2) {
-            Log.w("SleepPhaseDetector", "❌ No hay suficientes RR válidos para SDNN: $rr")
             return 0.0
         }
 
@@ -122,7 +118,6 @@ class SensorRepositoryImpl(
 
         val sdnn = kotlin.math.sqrt(squaredDiffs.average())
 
-        Log.d("SleepPhaseDetector", "📊 SDNN: $sdnn, RR: $validRR")
 
         return sdnn
     }

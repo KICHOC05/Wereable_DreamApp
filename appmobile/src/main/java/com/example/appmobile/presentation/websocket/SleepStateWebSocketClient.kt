@@ -8,6 +8,7 @@ import java.net.URI
 
 class SleepStateWebSocketClient(
     private val serverUrl: String,
+    private val authToken: String,
     private val onConnectionChanged: (Boolean) -> Unit,
     private val onMessageReceived: (String) -> Unit
 ) {
@@ -22,18 +23,14 @@ class SleepStateWebSocketClient(
             disconnect()
             
             val uri = URI(serverUrl)
-            Log.d(tag, "Intentando conectar a: $serverUrl")
-            Log.d(tag, "URI parsed: $uri")
             
             webSocketClient = object : WebSocketClient(uri) {
                 override fun onOpen(handshake: ServerHandshake?) {
                     Log.d(tag, "✅ Conectado al servidor WebSocket")
-                    Log.d(tag, "Handshake: ${handshake?.httpStatusMessage}")
                     onConnectionChanged(true)
                 }
                 
                 override fun onMessage(message: String?) {
-                    Log.d(tag, "📨 Mensaje recibido: $message")
                     message?.let { onMessageReceived(it) }
                 }
                 
@@ -43,20 +40,17 @@ class SleepStateWebSocketClient(
                 }
                 
                 override fun onError(ex: Exception?) {
-                    Log.e(tag, "🚨 Error en WebSocket: ${ex?.message}", ex)
-                    Log.e(tag, "Tipo de error: ${ex?.javaClass?.simpleName}")
+                    Log.e(tag, "Error de conexión WebSocket")
                     onConnectionChanged(false)
                 }
             }
             
-            // Configurar timeouts para evitar conexiones colgadas
+            webSocketClient?.addHeader("Authorization", "Bearer $authToken")
+            // Configurar timeouts para evitar conexiones colgadas.
             webSocketClient?.connectionLostTimeout = 30 // 30 segundos
-            
-            Log.d(tag, "Iniciando conexión WebSocket...")
             webSocketClient?.connect()
-            Log.d(tag, "Comando de conexión enviado")
         } catch (e: Exception) {
-            Log.e(tag, "💥 Error al crear cliente WebSocket: ${e.message}", e)
+            Log.e(tag, "No se pudo crear el cliente WebSocket")
             onConnectionChanged(false)
         }
     }
@@ -65,14 +59,11 @@ class SleepStateWebSocketClient(
         try {
             webSocketClient?.let { client ->
                 if (client.isOpen) {
-                    Log.d(tag, "Cerrando conexión WebSocket activa...")
                     client.close(1000, "Cliente desconectándose normalmente")
-                } else {
-                    Log.d(tag, "Conexión WebSocket ya estaba cerrada")
                 }
             }
         } catch (e: Exception) {
-            Log.e(tag, "Error al cerrar WebSocket: ${e.message}", e)
+            Log.e(tag, "No se pudo cerrar el WebSocket")
         } finally {
             webSocketClient = null
             onConnectionChanged(false)
@@ -103,9 +94,8 @@ class SleepStateWebSocketClient(
             
             val jsonMessage = gson.toJson(message)
             webSocketClient?.send(jsonMessage)
-            Log.d(tag, "Estado enviado: $jsonMessage")
         } catch (e: Exception) {
-            Log.e(tag, "Error enviando estado de sueño: ${e.message}", e)
+            Log.e(tag, "No se pudo enviar el estado de sueño")
         }
     }
     
@@ -118,9 +108,8 @@ class SleepStateWebSocketClient(
             
             val jsonMessage = gson.toJson(message)
             webSocketClient?.send(jsonMessage)
-            Log.d(tag, "Mensaje enviado: $jsonMessage")
         } catch (e: Exception) {
-            Log.e(tag, "Error enviando mensaje: ${e.message}", e)
+            Log.e(tag, "No se pudo enviar el mensaje WebSocket")
         }
     }
     

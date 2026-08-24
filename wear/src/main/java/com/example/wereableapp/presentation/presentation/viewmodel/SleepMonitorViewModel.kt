@@ -57,25 +57,18 @@ class SleepMonitorViewModel(
 
     fun sendTestData() {
         viewModelScope.launch {
-            Log.i("WearableVM", "🧪 INICIANDO ENVÍO DE DATOS DE PRUEBA")
             try {
                 // Enviar Heart Rate
-                Log.i("WearableVM", "📤 Enviando HR test: 75.0")
                 wearConnectionRepository.sendHeartRate(75.0f)
                 kotlinx.coroutines.delay(500) // Pequeño delay entre envíos
                 
                 // Enviar HRV
-                Log.i("WearableVM", "📤 Enviando HRV test: 45.2, 50.1")
                 wearConnectionRepository.sendHRV(45.2, 50.1)
                 kotlinx.coroutines.delay(500)
                 
                 // Enviar Sleep Phase
-                Log.i("WearableVM", "📤 Enviando Phase test: DEEP")
                 wearConnectionRepository.sendSleepPhase("DEEP")
-                
-                Log.i("WearableVM", "✅ TODOS LOS DATOS DE PRUEBA ENVIADOS")
             } catch (e: Exception) {
-                Log.e("WearableVM", "❌ Error enviando datos de prueba: ${e.message}")
             }
         }
     }
@@ -140,12 +133,6 @@ class SleepMonitorViewModel(
                         sleepPhaseRepository.insert(it)
                         lastRecord = it
                         lastInsertTime = currentTime
-                        Log.d("SleepViewModel", "✅ Registro insertado: $it")
-                    } else {
-                        Log.d(
-                            "SleepViewModel",
-                            "⏳ Registro omitido - Tiempo: $timeElapsed ms, Diferencia suficiente: $isDifferentEnough"
-                        )
                     }
                 }
             }
@@ -155,7 +142,7 @@ class SleepMonitorViewModel(
     fun sendFakeSleepCycle() {
         val json = """
         {
-          "uidUser": "l20rMb0Sz6QjViBxPdi5Yfab8R23",
+          "uidUser": "test-user",
           "deviceId": "smartwatch001",
           "date": "2025-08-11",
           "startTime": "2025-08-10T22:30:00.000Z",
@@ -224,9 +211,7 @@ class SleepMonitorViewModel(
         viewModelScope.launch {
             try {
                 wearConnectionRepository.sendSleepJson(json)
-                Log.i("SleepMonitorVM", "✅ JSON de ciclo fake enviado")
             } catch (e: Exception) {
-                Log.e("SleepMonitorVM", "❌ Error enviando JSON: ${e.message}")
             }
         }
     }

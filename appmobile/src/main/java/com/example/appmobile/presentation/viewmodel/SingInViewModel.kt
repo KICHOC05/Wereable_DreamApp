@@ -69,22 +69,18 @@ class SignInViewModel(
                     
                     if (searchResult.isSuccess) {
                         val searchResponse = searchResult.getOrNull()
-                        Log.d("SignInViewModel", "🔍 SearchUser response: status=${searchResponse?.status}, message=${searchResponse?.message}")
                         
                         if (searchResponse?.status == true) {
                             // Usuario ya está registrado - obtener sus datos de la nube
-                            Log.d("SignInViewModel", "👤 Usuario existente encontrado, obteniendo datos...")
                             try {
                                 val userDataResult = getUserByUidUseCase(uid)
                                 if (userDataResult.isSuccess) {
                                     val userDataResponse = userDataResult.getOrNull()
                                     val userData = userDataResponse?.data  // Acceder al objeto data
-                                    Log.d("SignInViewModel", "📡 Datos obtenidos de la nube: response=$userDataResponse, userData=$userData")
                                     
                                     if (userData != null) {
                                         // Validar que los datos no sean null/empty
                                         if (userData.sex.isBlank() || userData.uidUser.isBlank()) {
-                                            Log.e("SignInViewModel", "❌ Datos incompletos recibidos de la API: sex=${userData.sex}, uidUser=${userData.uidUser}")
                                             return@launch
                                         }
                                         
@@ -98,12 +94,10 @@ class SignInViewModel(
                                                     sexo = userData.sex
                                                 )
                                                 
-                                                Log.d("SignInViewModel", "💾 Guardando en BD local: $userEntity")
                                                 val id = userDatabase.userDataDao().insert(userEntity)
                                                 val userWithId = userEntity.copy(id = id)
                                                 
                                                 // Enviar al wearable
-                                                Log.d("SignInViewModel", "⌚ Enviando datos al wearable...")
                                                 wearMessageSender.sendUserDataToWear(
                                                     edad = userData.age,
                                                     peso = userData.weightKg.toFloat(),
@@ -111,21 +105,14 @@ class SignInViewModel(
                                                     sexo = userData.sex
                                                 )
                                                 
-                                                Log.d("SignInViewModel", "✅ Datos de usuario existente guardados localmente y enviados al wearable: $userWithId")
                                             } catch (e: Exception) {
-                                                Log.e("SignInViewModel", "❌ Error guardando datos del usuario existente: ${e.message}")
-                                                e.printStackTrace()
                                             }
                                         }
                                     } else {
-                                        Log.e("SignInViewModel", "❌ userData es null después de obtener de la API")
                                     }
                                 } else {
-                                    Log.e("SignInViewModel", "❌ Error obteniendo datos del usuario: ${userDataResult.exceptionOrNull()?.message}")
                                 }
                             } catch (e: Exception) {
-                                Log.e("SignInViewModel", "❌ Error obteniendo datos del usuario: ${e.message}")
-                                e.printStackTrace()
                             }
                             
                             // Usuario ya está registrado - puede ir a ProfileScreen

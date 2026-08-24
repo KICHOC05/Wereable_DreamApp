@@ -18,11 +18,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.google.gson.Gson
 import javax.inject.Named
+import com.example.dashboardapp.data.local.session.SessionCookieJar
 
 @HiltViewModel
 class UserListViewModel @Inject constructor(
     @Named("webSocketUrl") private val webSocketUrl: String,
-    private val notifyUpdateHelper: NotifyUpdateHelper
+    private val notifyUpdateHelper: NotifyUpdateHelper,
+    private val sessionCookieJar: SessionCookieJar
 ) : ViewModel() {
 
     private val _users = MutableStateFlow<List<User>>(emptyList())
@@ -40,7 +42,9 @@ class UserListViewModel @Inject constructor(
     fun connectWebSocket() {
         _isLoading.value = true
         val client = OkHttpClient()
-        val request = Request.Builder().url(webSocketUrl).build()
+        val requestBuilder = Request.Builder().url(webSocketUrl)
+        sessionCookieJar.cookieHeader(webSocketUrl)?.let { requestBuilder.header("Cookie", it) }
+        val request = requestBuilder.build()
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) {
                 viewModelScope.launch { _isLoading.value = false }

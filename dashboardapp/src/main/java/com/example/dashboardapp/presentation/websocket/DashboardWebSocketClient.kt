@@ -9,6 +9,7 @@ import java.net.URI
 
 class DashboardWebSocketClient(
     private val serverUrl: String,
+    private val cookieHeader: String?,
     private val onConnectionChanged: (Boolean) -> Unit,
     private val onSleepStateUpdate: (SleepStateUpdate) -> Unit,
     private val onAllStatesReceived: (List<SleepStateUpdate>) -> Unit,
@@ -22,8 +23,6 @@ class DashboardWebSocketClient(
     fun connect() {
         try {
             val uri = URI(serverUrl)
-            Log.d(tag, "Conectando al dashboard WebSocket: $serverUrl")
-            
             webSocketClient = object : WebSocketClient(uri) {
                 override fun onOpen(handshake: ServerHandshake?) {
                     Log.d(tag, "✅ Conectado al dashboard WebSocket")
@@ -31,24 +30,23 @@ class DashboardWebSocketClient(
                 }
                 
                 override fun onMessage(message: String?) {
-                    Log.d(tag, "📨 Mensaje recibido: $message")
                     message?.let { handleMessage(it) }
                 }
                 
                 override fun onClose(code: Int, reason: String?, remote: Boolean) {
-                    Log.d(tag, "❌ Dashboard WebSocket cerrado - Código: $code, Razón: $reason")
+                    Log.d(tag, "Dashboard WebSocket cerrado")
                     onConnectionChanged(false)
                 }
                 
                 override fun onError(ex: Exception?) {
-                    Log.e(tag, "🚨 Error en dashboard WebSocket: ${ex?.message}", ex)
+                    Log.e(tag, "Error de conexión WebSocket")
                     onConnectionChanged(false)
                 }
             }
-            
+            cookieHeader?.takeIf { it.isNotBlank() }?.let { webSocketClient?.addHeader("Cookie", it) }
             webSocketClient?.connect()
         } catch (e: Exception) {
-            Log.e(tag, "💥 Error al crear dashboard WebSocket: ${e.message}", e)
+            Log.e(tag, "No se pudo crear el cliente WebSocket")
             onConnectionChanged(false)
         }
     }
@@ -76,7 +74,7 @@ class DashboardWebSocketClient(
                     if (eventMap != null) {
                         parseState(eventMap)?.let { state ->
                             onSleepStateUpdate(state)
-                            Log.d(tag, "Estado actualizado: ${state.userId} -> ${state.sleepState}")
+                            Log.d(tag, "Estado de sueño actualizado")
                         }
                     }
                 }
@@ -86,14 +84,14 @@ class DashboardWebSocketClient(
                     val userName = messageMap["userName"] as? String
                     if (userId != null) {
                         onUserDisconnected(userId)
-                        Log.d(tag, "Usuario desconectado: $userId ($userName)")
+                        Log.d(tag, "Usuario desconectado del dashboard")
                     }
                 }
             }
         } catch (e: JsonSyntaxException) {
-            Log.e(tag, "Error parsing JSON: ${e.message}")
+            Log.e(tag, "No se pudo procesar el mensaje WebSocket")
         } catch (e: Exception) {
-            Log.e(tag, "Error handling message: ${e.message}")
+            Log.e(tag, "Error procesando el mensaje WebSocket")
         }
     }
     
@@ -109,7 +107,7 @@ class DashboardWebSocketClient(
                 deviceId = stateMap["deviceId"] as? String
             )
         } catch (e: Exception) {
-            Log.e(tag, "Error parsing state: ${e.message}")
+            Log.e(tag, "No se pudo procesar el estado de sueño")
             null
         }
     }

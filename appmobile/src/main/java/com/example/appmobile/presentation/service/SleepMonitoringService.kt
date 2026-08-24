@@ -14,12 +14,14 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.appmobile.R
 import com.example.appmobile.MainActivity
+import com.example.appmobile.data.remote.FirebaseAuthTokenProvider
 import com.example.appmobile.presentation.websocket.SleepStateEnum
 import com.example.appmobile.presentation.websocket.SleepStateWebSocketClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -91,7 +93,7 @@ class SleepMonitoringService : Service() {
                         val sleepState = SleepStateEnum.valueOf(sleepStateStr)
                         sendSleepState(userId, userName, sleepState)
                     } catch (e: Exception) {
-                        Log.e("SleepService", "Error parsing sleep state: $sleepStateStr", e)
+                        Log.e("SleepService", "No se pudo procesar el estado de sueño")
                     }
                 }
             }
@@ -101,7 +103,6 @@ class SleepMonitoringService : Service() {
     }
     
     private fun startMonitoring(userId: String, userName: String) {
-        Log.d("SleepService", "Iniciando monitoreo para usuario: $userName")
         
         // Si ya hay un cliente activo, desconectarlo primero
         webSocketClient?.disconnect()
@@ -109,26 +110,29 @@ class SleepMonitoringService : Service() {
         currentUserId = userId
         currentUserName = userName
         
-        // Crear conexión WebSocket
-        webSocketClient = SleepStateWebSocketClient(
-            serverUrl = serverUrl,
-            onConnectionChanged = { connected ->
-                Log.d("SleepService", "Estado de conexión cambió: $connected")
-                _isConnected.value = connected
-                updateNotification()
-            },
-            onMessageReceived = { message ->
-                Log.d("SleepService", "Mensaje recibido: $message")
-            }
-        )
-        
-        webSocketClient?.connect()
-        _isMonitoring.value = true
-        
         // Iniciar como servicio en primer plano
         startForeground(NOTIFICATION_ID, createNotification())
-        
-        Log.d("SleepService", "Monitoreo iniciado - Monitoring: ${_isMonitoring.value}, Connected: ${_isConnected.value}")
+        _isMonitoring.value = true
+
+        serviceScope.launch {
+            val token = FirebaseAuthTokenProvider.getCurrentToken()
+            if (token == null) {
+                Log.e("SleepService", "No se pudo autenticar el WebSocket")
+                stopMonitoring()
+                return@launch
+            }
+
+            webSocketClient = SleepStateWebSocketClient(
+                serverUrl = serverUrl,
+                authToken = token,
+                onConnectionChanged = { connected ->
+                    _isConnected.value = connected
+                    updateNotification()
+                },
+                onMessageReceived = { }
+            )
+            webSocketClient?.connect()
+        }
     }
     
     fun stopMonitoring() {
@@ -182,9 +186,7 @@ class SleepMonitoringService : Service() {
                 "timestamp" to System.currentTimeMillis()
             )
             webSocketClient?.sendMessage(disconnectMessage)
-            Log.d("SleepService", "Enviado mensaje de desconexión para usuario: $userName")
         } catch (e: Exception) {
-            Log.e("SleepService", "Error enviando mensaje de desconexión", e)
         }
     }
     

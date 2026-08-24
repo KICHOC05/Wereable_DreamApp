@@ -43,10 +43,8 @@ class UserViewModel(
                     if (response.isSuccessful) {
                         Log.d("UserViewModel", "✅ Usuario registrado en API")
                     } else {
-                        Log.d("UserViewModel", "⚠️ Falló registro en API: ${response.code()}")
                     }
                 } catch (apiError: Exception) {
-                    Log.d("UserViewModel", "❌ Error al registrar en API: ${apiError.localizedMessage}")
                 }
 
                 // 3️⃣ Enviar al wearable
@@ -59,10 +57,9 @@ class UserViewModel(
 
                 // 4️⃣ Notificar que se guardó
                 _userSaved.value = true
-                Log.d("UserViewModel", "✅ Usuario guardado local y enviado a wearable: $userWithId")
 
             } catch (e: Exception) {
-                Log.d("UserViewModel", "❌ Error: ${e.localizedMessage}")
+                Log.e("UserViewModel", "No se pudo guardar el usuario")
             }
         }
     }

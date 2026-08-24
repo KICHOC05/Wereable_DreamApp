@@ -24,7 +24,6 @@ class HRVSensorManager(
         val rr = (60_000 / bpm).toLong()
         rrIntervals.add(rr)
 
-        Log.d("HRVSensorManager", "RR simulado: $rr ms (BPM: $bpm)")
 
         if (rrIntervals.size >= 20) {
             onRRIntervalsReady(rrIntervals.toList())
@@ -33,11 +32,9 @@ class HRVSensorManager(
     }
 
     fun start() {
-        Log.d("HRVSensorManager", "Iniciado simulador HRV desde BPM.")
     }
 
     fun stop() {
         rrIntervals.clear()
-        Log.d("HRVSensorManager", "Detenido simulador HRV.")
     }
 }

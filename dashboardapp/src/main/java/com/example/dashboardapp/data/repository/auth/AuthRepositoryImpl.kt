@@ -11,10 +11,12 @@ import com.example.dashboardapp.domain.model.auth.UserInfo
 import com.example.dashboardapp.domain.repository.auth.AuthRepository
 import com.example.dashboardapp.data.remote.dto.auth.LogoutResponseDto
 import com.example.dashboardapp.data.remote.dto.auth.RegisterResponseDto
+import com.example.dashboardapp.data.local.session.SessionCookieJar
 
 class AuthRepositoryImpl(
     private val api: AuthApiService,
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val sessionCookieJar: SessionCookieJar
 ) : AuthRepository {
     override suspend fun login(userName: String, password: String, role: String): Result<UserInfo> {
         val response = api.login(LoginRequestDto(userName, password, role))
@@ -29,6 +31,7 @@ class AuthRepositoryImpl(
 
     override suspend fun logout(): Result<LogoutResponseDto> {
         val response = api.logout()
+        sessionCookieJar.clear()
         return if (response.isSuccessful && response.body()?.success == true) {
             Result.success(response.body()!!)
         } else {

@@ -10,8 +10,12 @@ import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.WearableListenerService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import com.google.gson.Gson
+import com.google.android.gms.wearable.Wearable
 
 
 /**
@@ -53,44 +57,48 @@ data class SleepCycle(
     val dataVersion: String
 )
 class PhoneMessageReceiver : WearableListenerService() {
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
-        Log.i("PhoneReceiver", "🚀 PhoneMessageReceiver iniciado")
     }
 
     override fun onMessageReceived(event: MessageEvent) {
         super.onMessageReceived(event)
-        Log.i("PhoneReceiver", "✅ Mensaje recibido PATH: ${event.path}")
-        val dataString = String(event.data)
-        Log.d("PhoneReceiver", "📦 Datos recibidos: $dataString")
-        Log.d("PhoneReceiver", "🌐 Nodo origen: ${event.sourceNodeId}")
-        Log.d("PhoneReceiver", "📏 Tamaño datos: ${event.data.size} bytes")
+        val path = event.path
+        val dataString = String(event.data, Charsets.UTF_8)
+        val sourceNodeId = event.sourceNodeId
+        serviceScope.launch {
+            if (!isTrustedNode(sourceNodeId)) {
+                Log.w("PhoneReceiver", "Mensaje rechazado: origen no confiable")
+                return@launch
+            }
+            handleMessage(path, dataString)
+        }
+    }
 
-        when (event.path) {
+    private suspend fun isTrustedNode(nodeId: String): Boolean =
+        Wearable.getNodeClient(applicationContext).connectedNodes.await()
+            .any { it.id == nodeId }
+
+    private fun handleMessage(path: String, dataString: String) {
+        when (path) {
             "/heart_rate" -> {
                 val bpm = dataString.toFloatOrNull()
-                Log.i("PhoneReceiver", "💓 Procesando HR raw: '$dataString' -> parsed: $bpm")
                 bpm?.let {
-                    Log.i("PhoneReceiver", "📲 Actualizando HR: $it")
                     runOnUiThread {
                         PhoneDataHolder.heartRate.value = it
-                        Log.i("PhoneReceiver", "✅ HR actualizado en holder: ${PhoneDataHolder.heartRate.value}")
                     }
-                } ?: Log.w("PhoneReceiver", "❌ No se pudo parsear HR: '$dataString'")
+                } ?: Log.w("PhoneReceiver", "No se pudo procesar la frecuencia cardíaca")
             }
             "/hrv" -> {
-                Log.i("PhoneReceiver", "📲 Actualizando HRV: $dataString")
                 runOnUiThread {
                     PhoneDataHolder.hrv.value = dataString
-                    Log.i("PhoneReceiver", "✅ HRV actualizado en holder: ${PhoneDataHolder.hrv.value}")
                 }
             }
             "/sleep_phase" -> {
-                Log.i("PhoneReceiver", "📲 Actualizando Phase: $dataString")
                 runOnUiThread {
                     PhoneDataHolder.sleepPhase.value = dataString
-                    Log.i("PhoneReceiver", "✅ Phase actualizado en holder: ${PhoneDataHolder.sleepPhase.value}")
                 }
             }
             "/sleep_full_data" -> {
@@ -139,16 +147,20 @@ class PhoneMessageReceiver : WearableListenerService() {
                         val db = SleepDatabase.getDatabase(applicationContext)
                         db.sleepCycleDao().insertSleepCycle(cycleEntity)
                         db.sleepPhaseDataDao().insertSleepPhaseData(phasesEntity)
-                        Log.i("PhoneReceiver", "✅ Sleep cycle y fases guardados en BD")
                     }
                 } catch (e: Exception) {
-                    Log.e("PhoneReceiver", "❌ Error parseando o guardando JSON: ${e.message}")
+                    Log.e("PhoneReceiver", "No se pudo guardar el ciclo de sueño")
                 }
             }
             else -> {
-                Log.w("PhoneReceiver", "⚠️ Path no reconocido: '${event.path}', datos: '$dataString'")
+                Log.w("PhoneReceiver", "Path de mensaje no reconocido")
             }
         }
+    }
+
+    override fun onDestroy() {
+        serviceScope.cancel()
+        super.onDestroy()
     }
 
     private fun runOnUiThread(action: () -> Unit) {

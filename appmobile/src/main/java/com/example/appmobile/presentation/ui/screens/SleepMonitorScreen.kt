@@ -44,7 +44,6 @@ fun SleepMonitorScreen(
     }
 
     LaunchedEffect(heartRate, hrv, sleepPhase) {
-        android.util.Log.i("SleepMonitorScreen", "HeartRate: $heartRate HRV: $hrv Phase: $sleepPhase")
     }
 
     Scaffold(

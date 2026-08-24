@@ -2,22 +2,21 @@ package com.example.dashboardapp.data.remote.helpers
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.net.HttpURLConnection
-import java.net.URL
+import okhttp3.Request
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import com.example.dashboardapp.data.local.session.SessionCookieJar
 
-class NotifyUpdateHelper(private val notifyUpdateUrl: String) {
+class NotifyUpdateHelper(
+    private val notifyUpdateUrl: String,
+    private val sessionCookieJar: SessionCookieJar
+) {
     suspend fun notifyUpdate() {
         withContext(Dispatchers.IO) {
             try {
-                val url = URL(notifyUpdateUrl)
-                val conn = url.openConnection() as HttpURLConnection
-                conn.requestMethod = "POST"
-                conn.connectTimeout = 3000
-                conn.readTimeout = 3000
-                conn.doOutput = true
-                conn.connect()
-                conn.inputStream.close()
-                conn.disconnect()
+                val url = notifyUpdateUrl.toHttpUrlOrNull() ?: return@withContext
+                val requestBuilder = Request.Builder().url(url).post(okhttp3.RequestBody.create(null, ByteArray(0)))
+                sessionCookieJar.cookieHeader(notifyUpdateUrl)?.let { requestBuilder.header("Cookie", it) }
+                okhttp3.OkHttpClient().newCall(requestBuilder.build()).execute().use { }
             } catch (_: Exception) {
             }
         }

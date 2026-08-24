@@ -6,7 +6,6 @@ import com.example.dashboardapp.domain.model.auth.UserInfo
 data class UserInfoDto(
     val id: String,
     val userName: String,
-    val password: String,
     val fullname: String,
     val role: String,
     val roles: List<String>,

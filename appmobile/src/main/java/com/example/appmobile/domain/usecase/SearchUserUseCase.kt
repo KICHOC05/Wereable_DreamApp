@@ -11,7 +11,7 @@ class SearchUserUseCase {
 
     init {
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://searchuser-nmry4bipxq-uc.a.run.app/")
+            .baseUrl(com.example.appmobile.BuildConfig.USER_SEARCH_API_BASE_URL)
             .client(okhttp3.OkHttpClient.Builder().addInterceptor(com.example.appmobile.data.remote.FirebaseAuthInterceptor()).build())
             .addConverterFactory(GsonConverterFactory.create())
             .build()

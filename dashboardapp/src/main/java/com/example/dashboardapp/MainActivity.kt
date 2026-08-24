@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
 import com.example.dashboardapp.data.local.session.SessionManager
-import androidx.compose.ui.platform.LocalContext
 import com.example.dashboardapp.presentation.navigation.AppNavHost
 import com.example.dashboardapp.ui.theme.WereableAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,8 +27,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    val context = LocalContext.current
-                    val sessionManager = SessionManager(context)
+                    val sessionManager = remember { SessionManager() }
                     AppNavHost(navController, sessionManager)
                 }
             }

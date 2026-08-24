@@ -32,7 +32,6 @@ class AccelerometerSensorManager(
             val yRounded = ((y * 10).toInt()) / 10f
             val zRounded = ((z * 10).toInt()) / 10f
 
-            Log.d("AccelerometerSensor", "x: $xRounded, y: $yRounded, z: $zRounded")
 
             onMovementDetected(xRounded, yRounded, zRounded)
         }
@@ -48,7 +47,6 @@ class AccelerometerSensorManager(
             Log.e("AccelerometerSensor", "❌ Sensor de acelerómetro no disponible.")
             return
         }
-        Log.d("AccelerometerSensor", "✅ Registrando listener de acelerómetro.")
         sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
@@ -56,7 +54,6 @@ class AccelerometerSensorManager(
     * Detiene la lectura del sensor
     * */
     fun stop() {
-        Log.d("AccelerometerSensor", "⏹️ Deteniendo listener de acelerómetro.")
         sensorManager.unregisterListener(listener)
     }
 }

@@ -55,7 +55,6 @@ class MainActivity : ComponentActivity() {
         // Esto asegura la conexión al DataClient o MessageClient
         Wearable.getMessageClient(this).addListener(object : MessageClient.OnMessageReceivedListener {
             override fun onMessageReceived(event: MessageEvent) {
-                Log.d("MainActivity", "🔔 Mensaje recibido desde wearable: ${event.path}")
             }
         })
     }

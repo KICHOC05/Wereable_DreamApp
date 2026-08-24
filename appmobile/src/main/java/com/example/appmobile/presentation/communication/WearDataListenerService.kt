@@ -17,22 +17,20 @@ class WearDataListenerService : WearableListenerService() {
     }
 
     override fun onMessageReceived(messageEvent: MessageEvent) {
-        Log.d("WearDataListener", "Mensaje recibido con path: ${messageEvent.path}")
 
         if (messageEvent.path == "/heart_rate") {
             val data = String(messageEvent.data)
             val bpm = data.toFloatOrNull()
 
             if (bpm != null) {
-                Log.d("WearDataListener", "BPM recibido: $bpm")
                 mainHandler.post {
                     HeartRateRepository.updateBPM(bpm)
                 }
             } else {
-                Log.e("WearDataListener", "No se pudo convertir '$data' a Float")
+                Log.e("WearDataListener", "No se pudo convertir la frecuencia cardíaca")
             }
         } else {
-            Log.w("WearDataListener", "Mensaje con path inesperado: ${messageEvent.path}")
+            Log.w("WearDataListener", "Mensaje con path inesperado")
         }
     }
 }

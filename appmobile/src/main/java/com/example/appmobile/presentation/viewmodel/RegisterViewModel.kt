@@ -71,9 +71,8 @@ class RegisterViewModel(private val context: Context) : ViewModel() {
                                 sexo = sex
                             )
                             
-                            Log.d("RegisterViewModel", "✅ Usuario guardado localmente y enviado al wearable: $userWithId")
                         } catch (e: Exception) {
-                            Log.e("RegisterViewModel", "❌ Error al guardar localmente o enviar al wearable: ${e.message}")
+                            Log.e("RegisterViewModel", "No se pudo guardar el usuario")
                         }
                     }
                     
