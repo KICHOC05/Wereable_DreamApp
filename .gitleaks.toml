@@ -8,3 +8,6 @@ description = "Firebase Android API key is a public client identifier and must b
 regexes = [
   '''AIzaSyDwOv2vy48dEOwH2Z9BsMePV960V9qCB4U''',
 ]
+paths = [
+  '''(?i)(^|/)google-services\.json$''',
+]
