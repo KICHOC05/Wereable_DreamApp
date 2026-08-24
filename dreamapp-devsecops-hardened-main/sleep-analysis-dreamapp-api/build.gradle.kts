@@ -34,7 +34,7 @@ dependencies {
     // =========================
     // Web Framework
     // =========================
-    implementation("io.javalin:javalin:6.3.0")
+    implementation("io.javalin:javalin:7.2.3")
 
     // =========================
     // Logging
