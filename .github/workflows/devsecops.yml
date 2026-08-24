@@ -49,7 +49,7 @@ jobs:
           java-version: "17"
           cache: gradle
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: Enable Gradle wrapper
         run: chmod +x gradlew
       - name: Static analysis
@@ -145,7 +145,7 @@ jobs:
           java-version: "17"
           cache: gradle
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: Enable Gradle wrapper
         run: chmod +x gradlew
       - name: Run lint and unit tests
@@ -257,7 +257,7 @@ jobs:
           cache: gradle
       - name: Set up Gradle for Java/Kotlin analysis
         if: matrix.language == 'java-kotlin'
-        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
       - name: Build backend for CodeQL
         if: matrix.language == 'java-kotlin'
         working-directory: dreamapp-devsecops-hardened-main/sleep-analysis-dreamapp-api
