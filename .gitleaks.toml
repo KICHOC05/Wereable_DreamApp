@@ -1,0 +1,10 @@
+title = "WereableApp Gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Firebase Android API key is a public client identifier and must be restricted by package and certificate."
+regexes = [
+  '''AIzaSyDwOv2vy48dEOwH2Z9BsMePV960V9qCB4U''',
+]
