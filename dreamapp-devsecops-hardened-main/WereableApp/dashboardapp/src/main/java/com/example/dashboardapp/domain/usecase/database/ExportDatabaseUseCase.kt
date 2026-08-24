@@ -1,7 +1,6 @@
 package com.example.dashboardapp.domain.usecase.database
 
 import android.content.Context
-import android.os.Environment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -23,9 +22,9 @@ class ExportDatabaseUseCase @Inject constructor() {
                 return@withContext Result.failure(Exception("Base de datos no encontrada"))
             }
 
-            // Crear directorio en el almacenamiento externo
-            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            val appDir = File(downloadsDir, "DashboardApp")
+            // Keep the export inside the app sandbox. Sharing must go through a
+            // controlled FileProvider instead of public external storage.
+            val appDir = File(context.cacheDir, "exports")
             if (!appDir.exists()) {
                 appDir.mkdirs()
             }

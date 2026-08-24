@@ -20,6 +20,7 @@ import com.example.dashboardapp.domain.usecase.auth.RegisterUseCase
 import javax.inject.Singleton
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.example.dashboardapp.data.local.session.SessionManager
+import com.example.dashboardapp.data.local.session.SessionCookieJar
 import com.example.dashboardapp.data.remote.api.sleep.SleepApiService
 import com.example.dashboardapp.data.remote.api.sleep.SleepPredictionApiService
 import com.example.dashboardapp.domain.repository.user.UserRepository
@@ -46,8 +47,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSessionManager(@ApplicationContext context: Context): SessionManager =
-        SessionManager(context)
+    fun provideSessionManager(): SessionManager = SessionManager()
+
+    @Provides
+    @Singleton
+    fun provideSessionCookieJar(): SessionCookieJar = SessionCookieJar()
 
     @Provides
     @Singleton
@@ -80,7 +84,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideNotifyUpdateHelper(@Named("notifyUpdateUrl") notifyUpdateUrl: String): NotifyUpdateHelper = NotifyUpdateHelper(notifyUpdateUrl)
+    fun provideNotifyUpdateHelper(
+        @Named("notifyUpdateUrl") notifyUpdateUrl: String,
+        sessionCookieJar: SessionCookieJar
+    ): NotifyUpdateHelper = NotifyUpdateHelper(notifyUpdateUrl, sessionCookieJar)
 
     @Provides
     @Singleton
@@ -88,8 +95,9 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(): Retrofit {
+    fun provideRetrofit(sessionCookieJar: SessionCookieJar): Retrofit {
         val okHttpClient = okhttp3.OkHttpClient.Builder()
+            .cookieJar(sessionCookieJar)
             .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
             .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
             .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
@@ -108,8 +116,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthRepository(api: AuthApiService, userDao: UserDao): AuthRepository =
-        AuthRepositoryImpl(api, userDao)
+    fun provideAuthRepository(
+        api: AuthApiService,
+        userDao: UserDao,
+        sessionCookieJar: SessionCookieJar
+    ): AuthRepository = AuthRepositoryImpl(api, userDao, sessionCookieJar)
 
     @Provides
     @Singleton

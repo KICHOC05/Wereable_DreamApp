@@ -15,10 +15,12 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Named
+import com.example.dashboardapp.data.local.session.SessionCookieJar
 
 @HiltViewModel
 class SleepStateViewModel @Inject constructor(
-    @Named("sleepWebSocketUrl") private val serverUrl: String
+    @Named("sleepWebSocketUrl") private val serverUrl: String,
+    private val sessionCookieJar: SessionCookieJar
 ) : ViewModel() {
     
     private val _isConnected = MutableStateFlow(false)
@@ -61,6 +63,7 @@ class SleepStateViewModel @Inject constructor(
             
             webSocketClient = DashboardWebSocketClient(
                 serverUrl = serverUrl,
+                cookieHeader = sessionCookieJar.cookieHeader(serverUrl),
                 onConnectionChanged = { connected ->
                     _isConnected.value = connected
                     Log.d("SleepStateViewModel", "Conexión dashboard: $connected")
@@ -99,7 +102,7 @@ class SleepStateViewModel @Inject constructor(
             
             webSocketClient?.connect()
         } catch (e: Exception) {
-            Log.e("SleepStateViewModel", "Error en conexión: ${e.message}")
+            Log.e("SleepStateViewModel", "Error de conexión")
             if (!hasConnectedBefore) {
                 _connectionMessage.value = "Error de conexión: ${e.message}"
                 _showConnectionError.value = true
@@ -187,14 +190,12 @@ class SleepStateViewModel @Inject constructor(
         val currentStates = _sleepStates.value.toMutableMap()
         currentStates[update.userId] = update
         _sleepStates.value = currentStates
-        Log.d("SleepStateViewModel", "Estado actualizado para ${update.userId}: ${update.sleepState}")
     }
     
     private fun removeUserSleepState(userId: String) {
         val currentStates = _sleepStates.value.toMutableMap()
         currentStates.remove(userId)
         _sleepStates.value = currentStates
-        Log.d("SleepStateViewModel", "Usuario removido: $userId")
     }
     
     private fun updateAllStates(states: List<SleepStateUpdate>) {

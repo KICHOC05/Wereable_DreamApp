@@ -56,19 +56,15 @@ class SleepMonitorViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             try {
                 val nodes = nodeClient.connectedNodes.await()
-                Log.d("SleepMonitorVM", "🔍 Nodos conectados: ${nodes.size}")
                 
                 if (nodes.isNotEmpty()) {
                     val node = nodes.first()
                     _connectedNodeName.value = node.displayName
-                    Log.i("SleepMonitorVM", "📱 Conectado a: ${node.displayName} (${node.id})")
                 } else {
                     _connectedNodeName.value = "No hay dispositivos conectados"
-                    Log.w("SleepMonitorVM", "⚠️ No hay dispositivos conectados")
                 }
             } catch (e: Exception) {
-                _connectedNodeName.value = "Error: ${e.message}"
-                Log.e("SleepMonitorVM", "❌ Error obteniendo nodos: ${e.message}")
+                _connectedNodeName.value = "No se pudo obtener el dispositivo"
             }
         }
     }
@@ -83,7 +79,6 @@ class SleepMonitorViewModel(application: Application) : AndroidViewModel(applica
 
     fun startMonitoring() {
         _isMonitoring.value = true
-        Log.i("SleepMonitorVM", "🟢 Monitoreo iniciado")
         
         // Iniciar seguimiento de cambios en los datos y guardar en BD
         viewModelScope.launch {
@@ -91,7 +86,6 @@ class SleepMonitorViewModel(application: Application) : AndroidViewModel(applica
                 if (hr != null) {
                     _messagesReceived.value = _messagesReceived.value + 1
                     _lastMessageTime.value = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
-                    Log.i("SleepMonitorVM", "📊 HR actualizado: $hr (msgs: ${_messagesReceived.value})")
                     
                     // Guardar en BD cuando recibimos datos
                     saveCurrentDataToDatabase()
@@ -104,7 +98,6 @@ class SleepMonitorViewModel(application: Application) : AndroidViewModel(applica
                 if (hrv != null) {
                     _messagesReceived.value = _messagesReceived.value + 1
                     _lastMessageTime.value = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
-                    Log.i("SleepMonitorVM", "📊 HRV actualizado: $hrv (msgs: ${_messagesReceived.value})")
                     
                     // Guardar en BD cuando recibimos datos
                     saveCurrentDataToDatabase()
@@ -117,7 +110,6 @@ class SleepMonitorViewModel(application: Application) : AndroidViewModel(applica
                 if (phase != null) {
                     _messagesReceived.value = _messagesReceived.value + 1
                     _lastMessageTime.value = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
-                    Log.i("SleepMonitorVM", "📊 Phase actualizado: $phase (msgs: ${_messagesReceived.value})")
                     
                     // Guardar en BD cuando recibimos datos
                     saveCurrentDataToDatabase()
@@ -136,17 +128,14 @@ class SleepMonitorViewModel(application: Application) : AndroidViewModel(applica
                 // Solo guardar si tenemos al menos un dato
                 if (currentHR != null || currentHRV != null || currentPhase != null) {
                     repository.insertSleepData(currentHR, currentHRV, currentPhase)
-                    Log.i("SleepMonitorVM", "💾 Datos guardados en BD: HR=$currentHR, HRV=$currentHRV, Phase=$currentPhase")
                 }
             } catch (e: Exception) {
-                Log.e("SleepMonitorVM", "❌ Error guardando en BD: ${e.message}")
             }
         }
     }
 
     fun stopMonitoring() {
         _isMonitoring.value = false
-        Log.i("SleepMonitorVM", "🔴 Monitoreo detenido")
     }
     
     // Función para limpiar datos (útil para testing)
@@ -157,7 +146,6 @@ class SleepMonitorViewModel(application: Application) : AndroidViewModel(applica
             PhoneDataHolder.sleepPhase.value = null
             _messagesReceived.value = 0
             _lastMessageTime.value = null
-            Log.i("SleepMonitorVM", "🧹 Datos limpiados")
         }
     }
      private val db = SleepDatabase.getDatabase(application)

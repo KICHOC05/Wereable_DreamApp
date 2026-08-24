@@ -28,10 +28,8 @@ class WearMessageSender(private val context: Context) {
             for (node in nodes) {
                 val sendTask = messageClient.sendMessage(node.id, path, message.toByteArray())
                 Tasks.await(sendTask)
-                Log.d("WearMessageSender", "✅ Datos enviados al nodo ${node.displayName}: $message")
             }
         } catch (e: Exception) {
-            Log.e("WearMessageSender", "❌ Error al enviar datos: ${e.message}")
         }
     }
 }

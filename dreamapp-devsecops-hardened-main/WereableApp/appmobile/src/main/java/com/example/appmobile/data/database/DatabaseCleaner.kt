@@ -20,7 +20,7 @@ class DatabaseCleaner(private val context: Context) {
             Log.d("DatabaseCleaner", "✅ Base de datos de sueño limpiada")
             
         } catch (e: Exception) {
-            Log.e("DatabaseCleaner", "❌ Error limpiando bases de datos: ${e.message}")
+            Log.e("DatabaseCleaner", "No se pudieron limpiar las bases de datos")
         }
     }
 }

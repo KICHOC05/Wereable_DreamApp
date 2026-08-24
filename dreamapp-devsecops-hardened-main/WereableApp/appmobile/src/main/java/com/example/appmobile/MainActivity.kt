@@ -40,17 +40,14 @@ class MainActivity : ComponentActivity() {
             when (intent.getStringExtra("type")) {
                 "hr" -> {
                     val hr = intent.getFloatExtra("value", 0f)
-                    Log.i("MainActivity", "📲 Broadcast recibido HR: $hr")
                     PhoneDataHolder.heartRate.value = hr
                 }
                 "hrv" -> {
                     val hrv = intent.getStringExtra("value")
-                    Log.i("MainActivity", "📲 Broadcast recibido HRV: $hrv")
                     PhoneDataHolder.hrv.value = hrv
                 }
                 "phase" -> {
                     val phase = intent.getStringExtra("value")
-                    Log.i("MainActivity", "📲 Broadcast recibido SleepPhase: $phase")
                     PhoneDataHolder.sleepPhase.value = phase
                 }
             }

@@ -35,7 +35,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import android.util.Log
 import com.example.dashboardapp.domain.model.auth.UserInfo
 import com.example.dashboardapp.domain.utils.formatNameWithPlus
 import com.example.dashboardapp.presentation.ui.components.charts.efficiency.ChartEfficiencySleepPredictionNextMonth
@@ -92,61 +91,6 @@ fun StatsScreen(user: User, navController: NavController) {
                 sleepPredictionEfficiencyNextMonthViewModel.loadSleepPredictionEfficiencyNextMonth(
                     user.id
                 )
-            }
-
-            // Log en formato JSON para ver la respuesta
-            LaunchedEffect(uiState) {
-                val currentState = uiState // Extraer a variable local para smart cast
-                when (currentState) {
-                    is SleepStatsUiState.Loading -> {
-                        Log.d("SleepStatsJSON", "Loading...")
-                    }
-                    is SleepStatsUiState.Success -> {
-                        val data = currentState.data
-                        val jsonLog = """
-                        {
-                          "sleepStats": {
-                            "statsLastDay": {
-                              "sleepEfficiency": ${data.statsLastDay.sleepEfficiency},
-                              "sleepDuration": ${data.statsLastDay.sleepDuration},
-                              "light": ${data.statsLastDay.light},
-                              "deep": ${data.statsLastDay.deep},
-                              "rem": ${data.statsLastDay.rem},
-                              "awake": ${data.statsLastDay.awake},
-                              "avgHR": ${data.statsLastDay.avgHR},
-                              "awakenings": ${data.statsLastDay.awakenings}
-                            },
-                            "averagesLastWeek": {
-                              "sleepEfficiency": ${data.averagesLastWeek.sleepEfficiency},
-                              "sleepDuration": ${data.averagesLastWeek.sleepDuration},
-                              "light": ${data.averagesLastWeek.light},
-                              "deep": ${data.averagesLastWeek.deep},
-                              "rem": ${data.averagesLastWeek.rem},
-                              "awake": ${data.averagesLastWeek.awake},
-                              "avgHR": ${data.averagesLastWeek.avgHR},
-                              "awakenings": ${data.averagesLastWeek.awakenings}
-                            },
-                            "quality": {
-                              "good": ${data.quality.good},
-                              "fair": ${data.quality.fair},
-                              "poor": ${data.quality.poor},
-                              "excellent": ${data.quality.excellent}
-                            },
-                            "efficiency": {
-                              "last7DaysCount": ${data.efficiency.last7Days.size},
-                              "lastMonthCount": ${data.efficiency.lastMonth.size},
-                              "last6MonthsCount": ${data.efficiency.last6Months.size},
-                              "lastYearCount": ${data.efficiency.lastYear.size}
-                            }
-                          }
-                        }
-                        """.trimIndent()
-                        Log.d("SleepStatsJSON", jsonLog)
-                    }
-                    is SleepStatsUiState.Error -> {
-                        Log.e("SleepStatsJSON", """{"error": "${currentState.message}"}""")
-                    }
-                }
             }
 
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {

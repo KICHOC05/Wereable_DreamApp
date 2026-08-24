@@ -17,10 +17,8 @@ interface SleepApiService {
 object SleepApiClient {
     
     // Producción Firebase Cloud Functions
-    private const val PRODUCTION_URL = "https://registerusersleepdata-nmry4bipxq-uc.a.run.app/"
-    
     private val retrofit = retrofit2.Retrofit.Builder()
-        .baseUrl(PRODUCTION_URL)
+        .baseUrl(com.example.appmobile.BuildConfig.SLEEP_API_BASE_URL)
         .client(okhttp3.OkHttpClient.Builder().addInterceptor(FirebaseAuthInterceptor()).build())
         .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
         .build()
@@ -28,5 +26,5 @@ object SleepApiClient {
     val apiService: SleepApiService = retrofit.create(SleepApiService::class.java)
     
     // Método para obtener la URL actual (útil para debugging)
-    fun getCurrentBaseUrl(): String = PRODUCTION_URL
+    fun getCurrentBaseUrl(): String = com.example.appmobile.BuildConfig.SLEEP_API_BASE_URL
 }

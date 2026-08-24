@@ -18,7 +18,6 @@ fun HeartRateScreen(modifier: Modifier = Modifier) {
     //cambio el collectAsState
     val bpm by HeartRateRepository.bpm.collectAsState()
 
-    Log.d("HeartRateScreen", "Renderizando con BPM: $bpm")
 
     Column(
         modifier = modifier

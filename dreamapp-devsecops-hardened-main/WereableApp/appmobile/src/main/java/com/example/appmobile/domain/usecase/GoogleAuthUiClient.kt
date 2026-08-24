@@ -29,7 +29,6 @@ class GoogleAuthUiClient(
                 buildSignInRequest()
             ).await()
         } catch(e: Exception) {
-            e.printStackTrace()
             if(e is CancellationException) throw e
             null
         }
@@ -53,7 +52,6 @@ class GoogleAuthUiClient(
                 errorMessage = null
             )
         } catch(e: Exception) {
-            e.printStackTrace()
             if(e is CancellationException) throw e
             SignInResult(
                 data = null,
@@ -71,7 +69,6 @@ class GoogleAuthUiClient(
             oneTapClient.signOut().await()
             auth.signOut()
         } catch(e: Exception) {
-            e.printStackTrace()
             if(e is CancellationException) throw e
         }
     }

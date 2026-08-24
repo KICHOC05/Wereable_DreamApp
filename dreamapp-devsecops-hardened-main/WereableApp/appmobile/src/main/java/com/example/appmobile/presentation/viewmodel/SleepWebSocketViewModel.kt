@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.appmobile.presentation.websocket.SleepStateEnum
 import com.example.appmobile.presentation.websocket.SleepStateWebSocketClient
+import com.example.appmobile.data.remote.FirebaseAuthTokenProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,25 +44,28 @@ class SleepWebSocketViewModel : ViewModel() {
     }
     
     fun startSync() {
-        Log.d("SleepWebSocket", "Iniciando sincronización con URL: $serverUrl")
-        webSocketClient = SleepStateWebSocketClient(
-            serverUrl = serverUrl,
-            onConnectionChanged = { connected ->
-                Log.d("SleepWebSocket", "Estado de conexión cambió: $connected")
-                _isConnected.value = connected
-                if (!connected) {
-                    _isSyncEnabled.value = false
-                    _currentSleepState.value = null
-                }
-            },
-            onMessageReceived = { message ->
-                _lastMessage.value = message
-                Log.d("SleepWebSocket", "Mensaje recibido: $message")
+        viewModelScope.launch {
+            val token = FirebaseAuthTokenProvider.getCurrentToken()
+            if (token == null) {
+                _isSyncEnabled.value = false
+                return@launch
             }
-        )
-        
-        webSocketClient?.connect()
-        _isSyncEnabled.value = true
+
+            webSocketClient = SleepStateWebSocketClient(
+                serverUrl = serverUrl,
+                authToken = token,
+                onConnectionChanged = { connected ->
+                    _isConnected.value = connected
+                    if (!connected) {
+                        _isSyncEnabled.value = false
+                        _currentSleepState.value = null
+                    }
+                },
+                onMessageReceived = { message -> _lastMessage.value = message }
+            )
+            webSocketClient?.connect()
+            _isSyncEnabled.value = true
+        }
     }
     
     fun stopSync() {
@@ -88,9 +92,7 @@ class SleepWebSocketViewModel : ViewModel() {
                 "timestamp" to System.currentTimeMillis()
             )
             webSocketClient?.sendMessage(disconnectMessage)
-            Log.d("SleepWebSocketViewModel", "Enviado mensaje de desconexión para usuario: $userName")
         } catch (e: Exception) {
-            Log.e("SleepWebSocketViewModel", "Error enviando mensaje de desconexión", e)
         }
     }
     

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,9 +8,36 @@ plugins {
     id("kotlin-kapt")
 }
 
-val dreamAppApiUrl = providers.gradleProperty("DREAMAPP_API_URL")
-    .orElse(providers.environmentVariable("DREAMAPP_API_URL"))
-    .orElse("https://example.invalid/").get().trimEnd('/') + "/"
+val endpointProperties = Properties().apply {
+    val file = rootProject.file("config/api-endpoints.properties")
+    if (file.isFile) file.inputStream().use { load(it) }
+}
+
+fun endpoint(propertyName: String, environmentName: String): String =
+    providers.gradleProperty(environmentName)
+        .orElse(providers.environmentVariable(environmentName))
+        .orElse(endpointProperties.getProperty(propertyName, "https://example.invalid/"))
+        .get().trimEnd('/') + "/"
+
+val dreamAppApiUrl = endpoint("appmobile.api.baseUrl", "DREAMAPP_API_URL")
+val sleepApiBaseUrl = endpoint("appmobile.api.sleepBaseUrl", "DREAMAPP_SLEEP_API_URL")
+val userLookupBaseUrl = endpoint("appmobile.api.userLookupBaseUrl", "DREAMAPP_USER_LOOKUP_API_URL")
+val userSearchBaseUrl = endpoint("appmobile.api.userSearchBaseUrl", "DREAMAPP_USER_SEARCH_API_URL")
+val userRegistrationBaseUrl = endpoint("appmobile.api.userRegistrationBaseUrl", "DREAMAPP_USER_REGISTRATION_API_URL")
+val releaseStoreFile = providers.gradleProperty("RELEASE_STORE_FILE")
+    .orElse(providers.environmentVariable("RELEASE_STORE_FILE")).orNull
+val releaseStorePassword = providers.gradleProperty("RELEASE_STORE_PASSWORD")
+    .orElse(providers.environmentVariable("RELEASE_STORE_PASSWORD")).orNull
+val releaseKeyAlias = providers.gradleProperty("RELEASE_KEY_ALIAS")
+    .orElse(providers.environmentVariable("RELEASE_KEY_ALIAS")).orNull
+val releaseKeyPassword = providers.gradleProperty("RELEASE_KEY_PASSWORD")
+    .orElse(providers.environmentVariable("RELEASE_KEY_PASSWORD")).orNull
+val releaseSigningConfigured = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
 
 android {
     namespace = "com.example.appmobile"
@@ -27,8 +56,22 @@ android {
         buildConfigField("boolean", "DEBUG_DATABASE", "false")
         buildConfigField("String", "API_BASE_URL", "\"$dreamAppApiUrl\"")
         buildConfigField("String", "WS_BASE_URL", "\"${dreamAppApiUrl.replace("https://", "wss://").replace("http://", "ws://").trimEnd('/')}\"")
+        buildConfigField("String", "SLEEP_API_BASE_URL", "\"$sleepApiBaseUrl\"")
+        buildConfigField("String", "USER_LOOKUP_API_BASE_URL", "\"$userLookupBaseUrl\"")
+        buildConfigField("String", "USER_SEARCH_API_BASE_URL", "\"$userSearchBaseUrl\"")
+        buildConfigField("String", "USER_REGISTRATION_API_BASE_URL", "\"$userRegistrationBaseUrl\"")
     }
 
+    signingConfigs {
+        create("release") {
+            if (releaseSigningConfigured) {
+                storeFile = file(releaseStoreFile!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
     buildTypes {
         debug {
             isDebuggable = true
@@ -37,6 +80,9 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            if (releaseSigningConfigured) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -84,7 +130,7 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.coil.compose)
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.gson)
     // Room (Database)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
@@ -94,18 +140,15 @@ dependencies {
     implementation(libs.converter.gson)
 
     // OkHttp Logging
-    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+    implementation(libs.okhttp.logging.interceptor)
 
     // Retrofit para API calls
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.google.code.gson:gson:2.10.1")
 
     // Lifecycle ViewModel (Compose)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // WebSocket support
-    implementation("org.java-websocket:Java-WebSocket:1.5.3")
+    implementation(libs.java.websocket)
 
     // Conectar con el módulo wear
     wearApp(project(":wear"))

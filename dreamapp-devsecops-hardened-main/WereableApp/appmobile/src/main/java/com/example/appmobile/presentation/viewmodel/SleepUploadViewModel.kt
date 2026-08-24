@@ -53,13 +53,11 @@ class SleepUploadViewModel(application: Application) : AndroidViewModel(applicat
                 _uploadResult.value = null
                 _lastUploadMessage.value = "Subiendo ${dataType.displayName}..."
                 
-                Log.d("SleepUploadViewModel", "Iniciando subida de ${dataType.displayName} para usuario: $userId")
                 
                 val result = cloudRepository.uploadSampleSleepData(userId, dataType)
                 
                 result.fold(
                     onSuccess = { response ->
-                        Log.d("SleepUploadViewModel", "Subida exitosa: ${response.message}")
                         
                         // Marcar fecha de hoy como enviada para todos los tipos
                         markDateAsUploaded(userId, targetDate)
@@ -68,13 +66,13 @@ class SleepUploadViewModel(application: Application) : AndroidViewModel(applicat
                         _lastUploadMessage.value = "✅ ${dataType.displayName} subidos exitosamente"
                     },
                     onFailure = { error ->
-                        Log.e("SleepUploadViewModel", "Error en subida", error)
+                        Log.e("SleepUploadViewModel", "No se pudo subir el registro")
                         _uploadResult.value = UploadResult.Error(error.message ?: "Error desconocido")
                         _lastUploadMessage.value = "❌ Error: ${error.message}"
                     }
                 )
             } catch (e: Exception) {
-                Log.e("SleepUploadViewModel", "Error inesperado", e)
+                Log.e("SleepUploadViewModel", "Error inesperado")
                 _uploadResult.value = UploadResult.Error(e.message ?: "Error inesperado")
                 _lastUploadMessage.value = "❌ Error inesperado: ${e.message}"
             } finally {

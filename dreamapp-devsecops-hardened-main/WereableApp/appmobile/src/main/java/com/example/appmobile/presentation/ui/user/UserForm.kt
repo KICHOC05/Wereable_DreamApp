@@ -134,7 +134,6 @@ fun UserForm(
                     estatura = estatura.toFloatOrNull() ?: 0f,
                     sexo = sexo
                 )
-                Log.d("UserForm", "Usuario a guardar: $userData")
                 onSubmit(userData)
             },
             colors = ButtonDefaults.buttonColors(

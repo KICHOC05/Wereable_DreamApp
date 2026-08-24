@@ -82,13 +82,11 @@ class BackgroundSleepViewModel(application: Application) : AndroidViewModel(appl
             
             serviceManager.getCurrentSleepState()?.collect { sleepState ->
                 _currentSleepState.value = sleepState
-                Log.d("BackgroundSleepVM", "Estado de sueño cambió: $sleepState")
             }
         }
     }
     
     fun startBackgroundSync(userId: String, userName: String) {
-        Log.d("BackgroundSleepVM", "Iniciando sincronización en segundo plano para: $userName")
         
         currentUserId = userId
         currentUserName = userName
@@ -125,7 +123,6 @@ class BackgroundSleepViewModel(application: Application) : AndroidViewModel(appl
             return
         }
         
-        Log.d("BackgroundSleepVM", "Enviando estado de sueño: ${sleepState.displayName}")
         
         serviceManager.sendSleepState(userId, userName, sleepState)
         _currentSleepState.value = sleepState

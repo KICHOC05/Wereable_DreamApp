@@ -26,7 +26,6 @@ object HeartRateRepository {
 //    val bpm: State<Float> get() = _bpm
 //
 //    fun updateBPM(value: Float) {
-//        Log.d("HeartRateRepository", "BPM actualizado: $value")
 //        _bpm.value = value
 //    }
 //}

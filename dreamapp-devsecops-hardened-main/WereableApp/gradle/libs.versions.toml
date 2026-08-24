@@ -104,6 +104,11 @@ espressoCore = "3.5.1" # UI test framework for Android (simulate user interactio
 # Charts
 # =======================
 vico = "2.1.3"
+gson = "2.10.1"
+loggingInterceptor = "4.11.0"
+javaWebSocket = "1.5.3"
+lifecycleViewModelCompose = "2.9.2"
+coroutinesAndroid = "1.7.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -164,6 +169,11 @@ vico-multiplatform-m2 = { group = "com.patrykandpatrick.vico", name = "multiplat
 vico-multiplatform-m3 = { group = "com.patrykandpatrick.vico", name = "multiplatform-m3", version.ref = "vico" }
 # For the Android view system.
 vico-views = { group = "com.patrykandpatrick.vico", name = "views", version.ref = "vico" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
+java-websocket = { module = "org.java-websocket:Java-WebSocket", version.ref = "javaWebSocket" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutinesAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

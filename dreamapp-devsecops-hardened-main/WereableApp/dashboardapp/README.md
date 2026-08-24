@@ -860,20 +860,25 @@ adb shell am start -W -a android.intent.action.VIEW -d "http://192.168.137.1:707
 ### **Configuración de Firma**
 
 #### **Keystore Configuration**:
-```gradle
-// AQUÍ VA CONFIGURACIÓN DE KEYSTORE
-// signingConfigs para debug y release
-// Keystore path y passwords
-// Key alias para identificación
+Release signing is configured through environment variables and is never stored in
+the repository:
+
+```text
+RELEASE_STORE_FILE
+RELEASE_STORE_PASSWORD
+RELEASE_KEY_ALIAS
+RELEASE_KEY_PASSWORD
 ```
 
+The CI release pipeline decodes `ANDROID_KEYSTORE_BASE64` into a temporary file,
+passes these values as GitHub Actions secrets, and builds only after the quality
+and security checks pass.
+
 #### **Security Best Practices**:
-```gradle
-// AQUÍ VAN PRÁCTICAS DE SEGURIDAD
-// Ofuscación de código sensible
-// Hardening de configuraciones de red
-// Verificación de certificados SSL
-```
+- Release builds enable R8 and resource shrinking.
+- Production network traffic uses HTTPS/WSS only.
+- Session cookies and Firebase tokens are kept out of persistent storage and logs.
+- Keystores, passwords and signing material are excluded by `.gitignore`.
 
 ## Capturas de Pantalla de la Aplicación
 

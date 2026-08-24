@@ -25,7 +25,6 @@ class HeartRateSensorManager(
         override fun onSensorChanged(event: SensorEvent?) {
             if (event != null && event.values.isNotEmpty()) {
                 val bpm = event.values[0]
-                Log.d("HeartRateSensorManager", "Heart Rate: $bpm BPM")
                 onHeartRateChanged(bpm)
             }
         }
@@ -45,7 +44,6 @@ class HeartRateSensorManager(
             return
         }
 
-        Log.i("HeartRateSensorManager", "✅ Registrando sensor de frecuencia cardíaca.")
         sensorManager.registerListener(
             listener,
             heartRateSensor,
@@ -57,7 +55,6 @@ class HeartRateSensorManager(
      * Detiene la lectura del seonsor.
      */
     fun stop() {
-        Log.i("HeartRateSensorManager", "⏹️ Deteniendo sensor de frecuencia cardíaca.")
         sensorManager.unregisterListener(listener)
     }
 }

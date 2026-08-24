@@ -26,33 +26,26 @@ class CloudSleepDataRepository {
         dataType: SleepDataType
     ): Result<SleepUploadResponse> = withContext(Dispatchers.IO) {
         try {
-            Log.d("CloudSleepDataRepository", "Subiendo datos de tipo: $dataType para usuario: $userId")
-            
             val sleepData = generateSampleData(userId, dataType)
-            
-            Log.d("CloudSleepDataRepository", "Datos generados: ${gson.toJson(sleepData)}")
             
             val response = apiService.uploadSleepData(sleepData)
             
             if (response.isSuccessful) {
                 val body = response.body()
                 if (body != null) {
-                    Log.d("CloudSleepDataRepository", "Datos subidos exitosamente: ${gson.toJson(body)}")
                     Result.success(body)
                 } else {
                     Log.e("CloudSleepDataRepository", "Respuesta vacía del servidor")
                     Result.failure(Exception("Respuesta vacía del servidor"))
                 }
             } else {
-                Log.e("CloudSleepDataRepository", "Error del servidor: ${response.code()} - ${response.message()}")
+                Log.e("CloudSleepDataRepository", "Error del servidor: ${response.code()}")
                 
                 // Manejar errores específicos
                 val errorBody = response.errorBody()?.string()
                 if (errorBody != null) {
                     try {
                         val error = gson.fromJson(errorBody, SleepUploadError::class.java)
-                        Log.e("CloudSleepDataRepository", "Error específico: ${gson.toJson(error)}")
-                        
                         when (response.code()) {
                             409 -> Result.failure(Exception("Ya existe una sesión de sueño para esta fecha: ${error.date}"))
                             400 -> Result.failure(Exception("Datos inválidos: ${error.message}"))
@@ -60,7 +53,6 @@ class CloudSleepDataRepository {
                             else -> Result.failure(Exception("Error del servidor: ${error.message}"))
                         }
                     } catch (e: Exception) {
-                        Log.e("CloudSleepDataRepository", "Error parseando respuesta de error", e)
                         Result.failure(Exception("Error del servidor: ${response.message()}"))
                     }
                 } else {
@@ -68,7 +60,6 @@ class CloudSleepDataRepository {
                 }
             }
         } catch (e: Exception) {
-            Log.e("CloudSleepDataRepository", "Error de red o inesperado", e)
             Result.failure(e)
         }
     }

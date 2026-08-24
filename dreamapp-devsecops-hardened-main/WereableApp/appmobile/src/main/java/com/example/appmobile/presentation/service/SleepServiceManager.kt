@@ -30,7 +30,6 @@ class SleepServiceManager(private val context: Context) {
     }
     
     fun startMonitoring(userId: String, userName: String) {
-        Log.d("SleepServiceManager", "Iniciando monitoreo para: $userName")
         
         val intent = Intent(context, SleepMonitoringService::class.java).apply {
             action = SleepMonitoringService.ACTION_START_MONITORING
@@ -80,7 +79,7 @@ class SleepServiceManager(private val context: Context) {
             Log.d("SleepServiceManager", "Binding al servicio...")
             val intent = Intent(context, SleepMonitoringService::class.java)
             val success = context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-            Log.d("SleepServiceManager", "Bind result: $success")
+            Log.d("SleepServiceManager", "Servicio vinculado")
         } else {
             Log.d("SleepServiceManager", "Ya está bound al servicio")
         }
@@ -92,7 +91,7 @@ class SleepServiceManager(private val context: Context) {
             try {
                 context.unbindService(serviceConnection)
             } catch (e: Exception) {
-                Log.e("SleepServiceManager", "Error al unbind: ${e.message}")
+                Log.e("SleepServiceManager", "No se pudo desvincular el servicio")
             }
             bound = false
             service = null
@@ -111,9 +110,7 @@ class SleepServiceManager(private val context: Context) {
     fun forceReconnect() {
         Log.d("SleepServiceManager", "Forzando reconexión...")
         if (bound && service != null) {
-            Log.d("SleepServiceManager", "Servicio disponible - Estados: Monitoring=${service?.isMonitoring?.value}, Connected=${service?.isConnected?.value}")
         } else {
-            Log.d("SleepServiceManager", "Servicio NO disponible - Bound: $bound")
             bindToService()
         }
     }
