@@ -41,7 +41,7 @@ dependencies {
     // =========================
     implementation("org.slf4j:slf4j-api:2.0.13")
     runtimeOnly("ch.qos.logback:logback-classic:1.4.14")
-    runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.4")
+    runtimeOnly("net.logstash.logback:logstash-logback-encoder:9.0")
 
     // =========================
     // JSON Serialization
