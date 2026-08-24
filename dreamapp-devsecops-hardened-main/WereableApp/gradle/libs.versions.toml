@@ -89,7 +89,7 @@ googleid = "1.1.1" # Google ID sign-in integration with Credential Manager.
 # Dependency Injection - Hilt
 # =======================
 
-hiltAndroid = "2.52" # Hilt for dependency injection in Android.
+hiltAndroid = "2.60.1" # Hilt for dependency injection in Android.
 hiltNavigationCompose = "1.2.0" # Integration of Hilt with Jetpack Compose navigation.
 
 # =======================
